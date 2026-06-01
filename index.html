@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Mリーグ 2026SEASON | 統計サイト</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --primary: #0a1628;
+    --accent: #c8a84b;
+    --accent2: #e8c96a;
+    --bg: #0d1b2e;
+    --card: #132035;
+    --card2: #1a2a42;
+    --text: #e8edf5;
+    --text2: #8fa3bf;
+    --gold: #ffd700;
+    --silver: #c0c0c0;
+    --bronze: #cd7f32;
+    --plus: #4fc97e;
+    --minus: #e05c5c;
+    --border: #1e3050;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', 'Yu Gothic', sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    background: linear-gradient(135deg, #060e1c 0%, #0a1628 60%, #0e2040 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 0 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(200,168,75,0.15);
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-badge {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #0a1628;
+    font-weight: 900;
+    font-size: 15px;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-text { font-size: 17px; font-weight: 800; letter-spacing: 2px; color: var(--accent2); line-height: 1.2; }
+  .logo-sub { font-size: 10px; color: var(--text2); letter-spacing: 1px; }
+
+  /* ===== BOTTOM NAV (mobile) ===== */
+  .bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #060e1c;
+    border-top: 1px solid var(--border);
+    z-index: 200;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bottom-nav-inner {
+    display: flex;
+    justify-content: space-around;
+  }
+  .bottom-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px 8px;
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-size: 10px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: color 0.2s;
+    gap: 3px;
+  }
+  .bottom-nav-btn .nav-icon { font-size: 20px; line-height: 1; }
+  .bottom-nav-btn.active { color: var(--accent2); }
+  .bottom-nav-btn.active .nav-icon { filter: drop-shadow(0 0 4px var(--accent)); }
+
+  /* Desktop nav */
+  .desktop-nav { display: flex; gap: 4px; }
+  .desktop-nav a {
+    color: var(--text2);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .desktop-nav a:hover, .desktop-nav a.active {
+    background: rgba(200,168,75,0.15);
+    color: var(--accent2);
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    background: linear-gradient(180deg, #0a1628 0%, #0d1b2e 100%);
+    padding: 32px 16px 28px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 {
+    font-size: clamp(22px, 5vw, 36px);
+    font-weight: 900;
+    letter-spacing: clamp(2px, 1vw, 4px);
+    background: linear-gradient(135deg, var(--accent), var(--accent2), #fff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+  .hero p { color: var(--text2); font-size: 12px; letter-spacing: 2px; }
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: clamp(16px, 5vw, 48px);
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .num { font-size: clamp(24px, 5vw, 32px); font-weight: 900; color: var(--accent2); line-height: 1; }
+  .hero-stat .label { font-size: 10px; color: var(--text2); margin-top: 4px; letter-spacing: 1px; }
+
+  /* ===== MAIN ===== */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 12px 80px;
+  }
+
+  /* ===== SECTION ===== */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  /* ===== TABS ===== */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--primary);
+    padding: 4px;
+    border-radius: 10px;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 8px 14px;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #0a1628;
+  }
+
+  /* ===== TABLE WRAPPER (horizontal scroll on mobile) ===== */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+  .ranking-table {
+    width: 100%;
+    min-width: 480px;
+    border-collapse: collapse;
+    background: var(--card);
+  }
+  .ranking-table thead tr {
+    background: var(--primary);
+    border-bottom: 2px solid var(--accent);
+  }
+  .ranking-table th {
+    padding: 10px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .ranking-table th:first-child,
+  .ranking-table th:nth-child(2) { text-align: left; }
+  .ranking-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .ranking-table tbody tr:hover { background: var(--card2); }
+  .ranking-table tbody tr:last-child { border-bottom: none; }
+  .ranking-table td {
+    padding: 12px 12px;
+    font-size: 13px;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .ranking-table td:first-child { text-align: center; width: 44px; }
+  .ranking-table td:nth-child(2) { text-align: left; }
+
+  .rank-num {
+    font-size: 15px;
+    font-weight: 900;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  .rank-1 { background: linear-gradient(135deg, #ffd700, #ffec6e); color: #0a1628; }
+  .rank-2 { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: #0a1628; }
+  .rank-3 { background: linear-gradient(135deg, #cd7f32, #e8a050); color: #fff; }
+  .rank-other { color: var(--text2); font-size: 13px; }
+
+  .player-cell { display: flex; align-items: center; gap: 10px; }
+  .player-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+  }
+  .player-avatar-dummy {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e3050, #2a4060);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent2);
+    flex-shrink: 0;
+  }
+  .player-name { font-weight: 700; font-size: 14px; }
+
+  .score-plus { color: var(--plus); font-weight: 700; }
+  .score-minus { color: var(--minus); font-weight: 700; }
+  .score-zero { color: var(--text2); }
+
+  /* ===== ROOMS ===== */
+  .rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
+  .room-card {
+    background: var(--card);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .room-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  .room-header {
+    background: var(--primary);
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .room-date { font-size: 13px; font-weight: 700; color: var(--accent2); }
+  .room-games { font-size: 11px; color: var(--text2); background: var(--card2); padding: 3px 10px; border-radius: 20px; }
+  .room-memo { font-size: 11px; color: var(--text2); padding: 6px 14px; background: rgba(200,168,75,0.05); border-bottom: 1px solid var(--border); font-style: italic; }
+  .room-members { padding: 6px 0; }
+  .room-member {
+    display: flex;
+    align-items: center;
+    padding: 7px 14px;
+    gap: 10px;
+    transition: background 0.15s;
+  }
+  .room-member:hover { background: var(--card2); }
+  .room-rank {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .room-rank-1 { background: linear-gradient(135deg, #ffd700, #ffec6e); color: #0a1628; }
+  .room-rank-2 { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: #0a1628; }
+  .room-rank-3 { background: linear-gradient(135deg, #cd7f32, #e8a050); color: #fff; }
+  .room-rank-other { background: var(--border); color: var(--text2); }
+  .room-member-name { flex: 1; font-size: 13px; font-weight: 600; }
+  .room-member-score { font-size: 14px; font-weight: 800; }
+
+  /* ===== STATS CARDS ===== */
+  .stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px 12px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat-card .stat-label { font-size: 10px; color: var(--text2); letter-spacing: 1px; margin-bottom: 6px; }
+  .stat-card .stat-value { font-size: 24px; font-weight: 900; color: var(--accent2); }
+  .stat-card .stat-name { font-size: 12px; color: var(--text); margin-top: 4px; font-weight: 600; }
+
+  /* ===== CHART ===== */
+  .chart-container {
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 20px 16px 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chart-inner {
+    position: relative;
+    min-width: 320px;
+    height: 320px;
+  }
+  /* Player filter checkboxes */
+  .player-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.2s;
+    user-select: none;
+    background: var(--card2);
+    color: var(--text2);
+  }
+  .filter-chip.on { color: #fff; border-color: transparent; }
+  .filter-chip .chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ===== HIDDEN ===== */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ===== FOOTER ===== */
+  footer {
+    text-align: center;
+    padding: 24px 16px 32px;
+    color: var(--text2);
+    font-size: 11px;
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 640px) {
+    .bottom-nav { display: block; }
+    .desktop-nav { display: none; }
+    main { padding: 16px 10px 90px; }
+    .hero { padding: 24px 12px 20px; }
+    .rooms-grid { grid-template-columns: 1fr; }
+    .stats-cards { grid-template-columns: repeat(2, 1fr); }
+    .chart-inner { height: 260px; }
+  }
+</style>
+</head>
+<body>
+<!-- HEADER -->
+<header>
+<div class="header-inner">
+<div class="logo">
+<div class="logo-badge">M麻</div>
+<div>
+<div class="logo-text">M.LEAGUE</div>
+<div class="logo-sub">2026 SEASON</div>
+</div>
+</div>
+<nav class="desktop-nav">
+<a class="active" onclick="showTab('ranking',this)">🏆 ランキング</a>
+<a onclick="showTab('graph',this)">📈 推移グラフ</a>
+<a onclick="showTab('rooms',this)">📅 対局履歴</a>
+<a onclick="showTab('stats',this)">📊 スタッツ</a>
+</nav>
+</div>
+</header>
+<!-- BOTTOM NAV (mobile) -->
+<div class="bottom-nav">
+<div class="bottom-nav-inner">
+<button class="bottom-nav-btn active" data-tab="ranking" onclick="showTab('ranking',this)">
+<span class="nav-icon">🏆</span>ランキング
+    </button>
+<button class="bottom-nav-btn" data-tab="graph" onclick="showTab('graph',this)">
+<span class="nav-icon">📈</span>推移グラフ
+    </button>
+<button class="bottom-nav-btn" data-tab="rooms" onclick="showTab('rooms',this)">
+<span class="nav-icon">📅</span>対局履歴
+    </button>
+<button class="bottom-nav-btn" data-tab="stats" onclick="showTab('stats',this)">
+<span class="nav-icon">📊</span>スタッツ
+    </button>
+</div>
+</div>
+<!-- HERO -->
+<div class="hero">
+<h1>M.LEAGUE 2026SEASON</h1>
+<p>MAHJONG LEAGUE STATISTICS</p>
+<div class="hero-stats">
+<div class="hero-stat">
+<div class="num" id="hero-players">17</div>
+<div class="label">参加プレイヤー</div>
+</div>
+<div class="hero-stat">
+<div class="num" id="hero-rooms">8</div>
+<div class="label">開催セッション</div>
+</div>
+<div class="hero-stat">
+<div class="num" id="hero-games">62</div>
+<div class="label">総試合数</div>
+</div>
+</div>
+</div>
+<main>
+<!-- ===== RANKING TAB ===== -->
+<div class="tab-content active" id="tab-ranking">
+<div class="section">
+<div class="section-title">個人スコアランキング</div>
+<div class="tabs">
+<button class="tab-btn active" onclick="showRankingTab('score',this)">総合スコア</button>
+<button class="tab-btn" onclick="showRankingTab('avg',this)">平均スコア</button>
+<button class="tab-btn" onclick="showRankingTab('avoidlast',this)">ラス回避率</button>
+<button class="tab-btn" onclick="showRankingTab('rank1',this)">1位回数</button>
+</div>
+<div id="ranking-score">
+<div class="table-wrap">
+<table class="ranking-table">
+<thead><tr>
+<th>順位</th><th>プレイヤー</th><th>総合スコア</th>
+<th>半荘数</th><th>1位</th><th>2位</th><th>3位</th><th>4位</th><th>ラス回避率</th><th>連対率</th><th>平均順位</th>
+</tr></thead>
+<tbody id="tbody-score"></tbody>
+</table>
+</div>
+</div>
+<div id="ranking-avg" style="display:none">
+<div class="table-wrap">
+<table class="ranking-table">
+<thead><tr>
+<th>順位</th><th>プレイヤー</th><th>平均点</th>
+<th>半荘数</th><th>総合スコア</th><th>最高点</th><th>平均順位</th>
+</tr></thead>
+<tbody id="tbody-avg"></tbody>
+</table>
+</div>
+</div>
+<div id="ranking-avoidlast" style="display:none">
+<div class="table-wrap">
+<table class="ranking-table">
+<thead><tr>
+<th>順位</th><th>プレイヤー</th><th>ラス回避率</th>
+<th>半荘数</th><th>4位回数(率)</th><th>飛び率</th><th>総合スコア</th>
+</tr></thead>
+<tbody id="tbody-avoidlast"></tbody>
+</table>
+</div>
+</div>
+<div id="ranking-rank1" style="display:none">
+<div class="table-wrap">
+<table class="ranking-table">
+<thead><tr>
+<th>順位</th><th>プレイヤー</th><th>1位回数</th>
+<th>半荘数</th><th>1位率</th><th>連対率</th><th>総合スコア</th>
+</tr></thead>
+<tbody id="tbody-rank1"></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!-- ===== GRAPH TAB ===== -->
+<div class="tab-content" id="tab-graph">
+<div class="section">
+<div class="section-title">スコア推移グラフ</div>
+<!-- 累積スコア推移 -->
+<div class="chart-container">
+<div class="chart-title">📈 累積スコア推移（セッション別）</div>
+<div class="player-filter" id="filter-cumulative"></div>
+<div class="chart-wrap">
+<div class="chart-inner">
+<canvas id="chartCumulative"></canvas>
+</div>
+</div>
+</div>
+<!-- セッション別スコア -->
+<div class="chart-container">
+<div class="chart-title">📊 セッション別スコア（参加者のみ）</div>
+<div class="player-filter" id="filter-session"></div>
+<div class="chart-wrap">
+<div class="chart-inner">
+<canvas id="chartSession"></canvas>
+</div>
+</div>
+</div>
+<!-- 順位変動 -->
+<div class="chart-container">
+<div class="chart-title">🔄 総合順位変動（セッション後）</div>
+<div class="player-filter" id="filter-rank"></div>
+<div class="chart-wrap">
+<div class="chart-inner" style="height:340px">
+<canvas id="chartRank"></canvas>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ===== ROOMS TAB ===== -->
+<div class="tab-content" id="tab-rooms">
+<div class="section">
+<div class="section-title">対局履歴</div>
+<div class="rooms-grid" id="rooms-grid"></div>
+</div>
+</div>
+<!-- ===== STATS TAB ===== -->
+<div class="tab-content" id="tab-stats">
+<div class="section">
+<div class="section-title">注目スタッツ</div>
+<div class="stats-cards" id="stats-cards"></div>
+</div>
+<div class="section">
+<div class="section-title">全プレイヤー詳細スタッツ</div>
+<div class="table-wrap">
+<table class="ranking-table">
+<thead><tr>
+<th>順位</th><th>プレイヤー</th><th>総合スコア</th>
+<th>参加セッション数</th><th>半荘数</th><th>平均</th><th>最高</th><th>最低</th><th>1位率</th><th>ラス回避率</th>
+</tr></thead>
+<tbody id="tbody-detail"></tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<p>データ提供: <a href="https://app.ampai.jp/public/leagues/32776e2b685444734741784466543355484841762f673d3d/rooms" target="_blank">Ampai - Mリーグ 2026SEASON</a></p>
+<p style="margin-top:6px;">最終更新: 2026年5月30日</p>
+</footer>
+<script>
+// ===== DATA =====
+// Ampai公開APIから取得した正確なデータ
+// gameCount=半荘数, rank1〜4=回数, avoidLast=ラス回避率(%), rentai=連対率(%), dropOut=飛び率(%), rankAvg=平均順位, pointAvg=平均点, maxPoint=最高点
+const ranking = [
+  { name:"あきすけ",   iconUrl:"", totalScore:375,  hansoCount:27, rankAvg:1.96, pointAvg:30922, maxPoint:66000, rentai:74.07, lastEva:85.19, dropOut:3.70,  rank1:12, rank2:8,  rank3:3,  rank4:4,  r1pct:44.44, r2pct:29.63, r3pct:11.11, r4pct:14.81 },
+  { name:"安田　昂太", iconUrl:"", totalScore:193,  hansoCount:13, rankAvg:2.00, pointAvg:34130, maxPoint:57300, rentai:61.54, lastEva:100.0, dropOut:0.00,  rank1:5,  rank2:3,  rank3:5,  rank4:0,  r1pct:38.46, r2pct:23.08, r3pct:38.46, r4pct:0.00  },
+  { name:"Ｔ－石井",  iconUrl:"", totalScore:142,  hansoCount:34, rankAvg:2.44, pointAvg:28267, maxPoint:92900, rentai:58.82, lastEva:70.59, dropOut:5.88,  rank1:9,  rank2:11, rank3:4,  rank4:10, r1pct:26.47, r2pct:32.35, r3pct:11.76, r4pct:29.41 },
+  { name:"下村",       iconUrl:"", totalScore:120,  hansoCount:12, rankAvg:2.33, pointAvg:32150, maxPoint:85600, rentai:50.00, lastEva:83.33, dropOut:0.00,  rank1:4,  rank2:2,  rank3:4,  rank4:2,  r1pct:33.33, r2pct:16.67, r3pct:33.33, r4pct:16.67 },
+  { name:"sabo10",     iconUrl:"", totalScore:32,   hansoCount:23, rankAvg:2.52, pointAvg:26486, maxPoint:52700, rentai:43.48, lastEva:78.26, dropOut:8.70,  rank1:6,  rank2:4,  rank3:8,  rank4:5,  r1pct:26.09, r2pct:17.39, r3pct:34.78, r4pct:21.74 },
+  { name:"山",         iconUrl:"", totalScore:20,   hansoCount:12, rankAvg:2.42, pointAvg:24133, maxPoint:47000, rentai:58.33, lastEva:66.67, dropOut:8.33,  rank1:4,  rank2:3,  rank3:1,  rank4:4,  r1pct:33.33, r2pct:25.00, r3pct:8.33,  r4pct:33.33 },
+  { name:"tibiemon",   iconUrl:"", totalScore:14,   hansoCount:35, rankAvg:2.31, pointAvg:24045, maxPoint:38600, rentai:57.14, lastEva:85.71, dropOut:2.86,  rank1:9,  rank2:11, rank3:10, rank4:5,  r1pct:25.71, r2pct:31.43, r3pct:28.57, r4pct:14.29 },
+  { name:"川上",       iconUrl:"", totalScore:3,    hansoCount:12, rankAvg:2.33, pointAvg:25666, maxPoint:39700, rentai:58.33, lastEva:91.67, dropOut:0.00,  rank1:2,  rank2:5,  rank3:4,  rank4:1,  r1pct:16.67, r2pct:41.67, r3pct:33.33, r4pct:8.33  },
+  { name:"大上　悠介", iconUrl:"", totalScore:-24,  hansoCount:4,  rankAvg:2.50, pointAvg:23875, maxPoint:33800, rentai:50.00, lastEva:100.0, dropOut:0.00,  rank1:0,  rank2:2,  rank3:2,  rank4:0,  r1pct:0.00,  r2pct:50.00, r3pct:50.00, r4pct:0.00  },
+  { name:"津下",       iconUrl:"", totalScore:-48,  hansoCount:5,  rankAvg:2.80, pointAvg:19440, maxPoint:42900, rentai:20.00, lastEva:80.00, dropOut:0.00,  rank1:1,  rank2:0,  rank3:3,  rank4:1,  r1pct:20.00, r2pct:0.00,  r3pct:60.00, r4pct:20.00 },
+  { name:"黒沢真",     iconUrl:"", totalScore:-60,  hansoCount:4,  rankAvg:3.00, pointAvg:17550, maxPoint:26200, rentai:50.00, lastEva:50.00, dropOut:25.00, rank1:0,  rank2:2,  rank3:0,  rank4:2,  r1pct:0.00,  r2pct:50.00, r3pct:0.00,  r4pct:50.00 },
+  { name:"みやかわ",   iconUrl:"", totalScore:-68,  hansoCount:6,  rankAvg:2.83, pointAvg:20500, maxPoint:39500, rentai:50.00, lastEva:66.67, dropOut:16.67, rank1:0,  rank2:3,  rank3:1,  rank4:2,  r1pct:0.00,  r2pct:50.00, r3pct:16.67, r4pct:33.33 },
+  { name:"はな",       iconUrl:"", totalScore:-98,  hansoCount:21, rankAvg:2.76, pointAvg:21547, maxPoint:53300, rentai:38.10, lastEva:57.14, dropOut:14.29, rank1:6,  rank2:2,  rank3:4,  rank4:9,  r1pct:28.57, r2pct:9.52,  r3pct:19.05, r4pct:42.86 },
+  { name:"モロ",       iconUrl:"", totalScore:-106, hansoCount:15, rankAvg:2.87, pointAvg:21506, maxPoint:84600, rentai:40.00, lastEva:53.33, dropOut:20.00, rank1:3,  rank2:3,  rank3:2,  rank4:7,  r1pct:20.00, r2pct:20.00, r3pct:13.33, r4pct:46.67 },
+  { name:"竹内光平",   iconUrl:"", totalScore:-109, hansoCount:5,  rankAvg:3.20, pointAvg:13160, maxPoint:28600, rentai:20.00, lastEva:60.00, dropOut:20.00, rank1:0,  rank2:1,  rank3:2,  rank4:2,  r1pct:0.00,  r2pct:20.00, r3pct:40.00, r4pct:40.00 },
+  { name:"香取",       iconUrl:"", totalScore:-134, hansoCount:6,  rankAvg:3.00, pointAvg:11933, maxPoint:23100, rentai:16.67, lastEva:83.33, dropOut:16.67, rank1:0,  rank2:1,  rank3:4,  rank4:1,  r1pct:0.00,  r2pct:16.67, r3pct:66.67, r4pct:16.67 },
+  { name:"ほしまろ",   iconUrl:"", totalScore:-252, hansoCount:14, rankAvg:3.29, pointAvg:16264, maxPoint:47600, rentai:14.29, lastEva:50.00, dropOut:21.43, rank1:1,  rank2:1,  rank3:5,  rank4:7,  r1pct:7.14,  r2pct:7.14,  r3pct:35.71, r4pct:50.00 },
+];
+
+// セッションデータ（古い順）
+const sessions = [
+  { date:"2026-01-10", label:"1/10", gamesCount:5, memo:"",
+    members:[{name:"はな",score:61},{name:"Ｔ－石井",score:40},{name:"ほしまろ",score:-10},{name:"sabo10",score:-37},{name:"tibiemon",score:-54}] },
+  { date:"2026-02-21", label:"2/21", gamesCount:10, memo:"",
+    members:[{name:"sabo10",score:153},{name:"安田　昂太",score:143},{name:"Ｔ－石井",score:0},{name:"あきすけ",score:-4},{name:"川上",score:-14},{name:"tibiemon",score:-17},{name:"モロ",score:-58},{name:"はな",score:-86},{name:"ほしまろ",score:-117}] },
+  { date:"2026-02-23", label:"2/23", gamesCount:6, memo:"",
+    members:[{name:"下村",score:70},{name:"tibiemon",score:4},{name:"Ｔ－石井",score:-20},{name:"山",score:-54}] },
+  { date:"2026-02-25", label:"2/25", gamesCount:6, memo:"Ｔ－石井 国士無双 2026/2/25",
+    members:[{name:"あきすけ",score:137},{name:"Ｔ－石井",score:65},{name:"みやかわ",score:-68},{name:"香取",score:-134}] },
+  { date:"2026-03-28", label:"3/28", gamesCount:10, memo:"諸橋　数え役満（清一色、一気通貫、一盃口、平和、立直、一発、自摸、ドラ1）",
+    members:[{name:"モロ",score:82},{name:"安田　昂太",score:73},{name:"Ｔ－石井",score:56},{name:"川上",score:22},{name:"はな",score:-17},{name:"tibiemon",score:-48},{name:"津下",score:-48},{name:"あきすけ",score:-58},{name:"sabo10",score:-62}] },
+  { date:"2026-04-25", label:"4/25", gamesCount:11, memo:"",
+    members:[{name:"あきすけ",score:146},{name:"tibiemon",score:113},{name:"Ｔ－石井",score:8},{name:"はな",score:2},{name:"川上",score:-5},{name:"安田　昂太",score:-23},{name:"大上　悠介",score:-24},{name:"sabo10",score:-32},{name:"黒沢真",score:-60},{name:"ほしまろ",score:-125}] },
+  { date:"2026-05-03", label:"5/3",  gamesCount:7, memo:"下村　四暗刻　2026/5/2",
+    members:[{name:"山",score:74},{name:"下村",score:50},{name:"Ｔ－石井",score:46},{name:"tibiemon",score:-61},{name:"竹内光平",score:-109}] },
+  { date:"2026-05-30", label:"5/30", gamesCount:7, memo:"",
+    members:[{name:"あきすけ",score:154,iconUrl:"https://cloudfront-production.ampai.jp/icon/user/10328/fhfpSE8g6SSw4htffznLHwI5CSv7QYqGfAacTQok.png"},{name:"tibiemon",score:77},{name:"sabo10",score:10},{name:"Ｔ－石井",score:-53},{name:"はな",score:-58},{name:"モロ",score:-130}] },
+];
+
+// rooms (表示用・新しい順)
+const rooms = [...sessions].reverse().map(s => ({...s, members:[...s.members].sort((a,b)=>b.score-a.score)}));
+
+// ===== CHART COLORS =====
+const COLORS = [
+  '#e8c96a','#4fc97e','#5b9cf6','#f06292','#ff9800',
+  '#ab47bc','#26c6da','#ef5350','#66bb6a','#ffa726',
+  '#42a5f5','#ec407a','#26a69a','#d4e157','#8d6e63',
+  '#78909c','#7e57c2'
+];
+
+// ===== HELPERS =====
+function scoreClass(s){ return s>0?'score-plus':s<0?'score-minus':'score-zero'; }
+function scoreStr(s){ return s>0?'+'+s:String(s); }
+function pct(v){ return (v*100).toFixed(1)+'%'; }
+function avatar(p, size){ return ''; }
+function rankBadge(r){
+  if(r===1) return `<span class="rank-num rank-1">1</span>`;
+  if(r===2) return `<span class="rank-num rank-2">2</span>`;
+  if(r===3) return `<span class="rank-num rank-3">3</span>`;
+  return `<span class="rank-num rank-other">${r}</span>`;
+}
+
+// ===== RENDER RANKING =====
+function renderScore(){
+  const sorted=[...ranking].sort((a,b)=>b.totalScore-a.totalScore);
+  document.getElementById('tbody-score').innerHTML=sorted.map((p,i)=>`
+    <tr>
+      <td>${rankBadge(i+1)}</td>
+      <td><div class="player-cell"><div class="player-name">${p.name}</div></div></td>
+      <td class="${scoreClass(p.totalScore)}" style="font-size:16px;font-weight:900">${scoreStr(p.totalScore)}<small style="font-size:10px;color:var(--text2)">pt</small></td>
+      <td>${p.hansoCount}</td>
+      <td style="color:var(--gold)">${p.rank1}</td>
+      <td style="color:var(--silver)">${p.rank2}</td>
+      <td style="color:var(--bronze)">${p.rank3}</td>
+      <td style="color:var(--minus)">${p.rank4}</td>
+      <td>${p.lastEva.toFixed(2)}%</td>
+      <td>${p.rentai.toFixed(2)}%</td>
+      <td>${p.rankAvg.toFixed(2)}</td>
+    </tr>`).join('');
+}
+function renderAvg(){
+  const sorted=[...ranking].sort((a,b)=>b.pointAvg-a.pointAvg);
+  document.getElementById('tbody-avg').innerHTML=sorted.map((p,i)=>`
+    <tr>
+      <td>${rankBadge(i+1)}</td>
+      <td><div class="player-cell"><div class="player-name">${p.name}</div></div></td>
+      <td style="font-weight:900;color:var(--accent2)">${p.pointAvg.toLocaleString()}</td>
+      <td>${p.hansoCount}</td>
+      <td class="${scoreClass(p.totalScore)}">${scoreStr(p.totalScore)}</td>
+      <td style="color:var(--plus)">${p.maxPoint.toLocaleString()}</td>
+      <td>${p.rankAvg.toFixed(2)}</td>
+    </tr>`).join('');
+}
+function renderAvoidLast(){
+  const sorted=[...ranking].sort((a,b)=>b.lastEva-a.lastEva);
+  document.getElementById('tbody-avoidlast').innerHTML=sorted.map((p,i)=>`
+    <tr>
+      <td>${rankBadge(i+1)}</td>
+      <td><div class="player-cell"><div class="player-name">${p.name}</div></div></td>
+      <td style="font-size:16px;font-weight:900;color:var(--accent2)">${p.lastEva.toFixed(2)}%</td>
+      <td>${p.hansoCount}</td>
+      <td style="color:var(--minus)">${p.rank4}回 (${p.r4pct.toFixed(1)}%)</td>
+      <td>${p.dropOut.toFixed(2)}%</td>
+      <td class="${scoreClass(p.totalScore)}">${scoreStr(p.totalScore)}</td>
+    </tr>`).join('');
+}
+function renderRank1(){
+  const sorted=[...ranking].sort((a,b)=>b.rank1-a.rank1||b.totalScore-a.totalScore);
+  document.getElementById('tbody-rank1').innerHTML=sorted.map((p,i)=>`
+    <tr>
+      <td>${rankBadge(i+1)}</td>
+      <td><div class="player-cell"><div class="player-name">${p.name}</div></div></td>
+      <td style="font-size:16px;font-weight:900;color:var(--gold)">${p.rank1}回</td>
+      <td>${p.hansoCount}</td>
+      <td>${p.r1pct.toFixed(1)}%</td>
+      <td>${p.rentai.toFixed(2)}%</td>
+      <td class="${scoreClass(p.totalScore)}">${scoreStr(p.totalScore)}</td>
+    </tr>`).join('');
+}
+function renderDetail(){
+  const sorted=[...ranking].sort((a,b)=>b.totalScore-a.totalScore);
+  document.getElementById('tbody-detail').innerHTML=sorted.map((p,i)=>`
+    <tr>
+      <td>${rankBadge(i+1)}</td>
+      <td><div class="player-cell"><div class="player-name">${p.name}</div></div></td>
+      <td class="${scoreClass(p.totalScore)}" style="font-weight:800">${scoreStr(p.totalScore)}</td>
+      <td>${p.hansoCount}</td>
+      <td>${p.rankAvg.toFixed(2)}</td>
+      <td>${p.pointAvg.toLocaleString()}</td>
+      <td style="color:var(--plus)">${p.maxPoint.toLocaleString()}</td>
+      <td>${p.rentai.toFixed(2)}%</td>
+      <td>${p.lastEva.toFixed(2)}%</td>
+      <td>${p.dropOut.toFixed(2)}%</td>
+      <td style="color:var(--gold)">${p.rank1}(${p.r1pct.toFixed(1)}%)</td>
+      <td style="color:var(--silver)">${p.rank2}(${p.r2pct.toFixed(1)}%)</td>
+      <td style="color:var(--bronze)">${p.rank3}(${p.r3pct.toFixed(1)}%)</td>
+      <td style="color:var(--minus)">${p.rank4}(${p.r4pct.toFixed(1)}%)</td>
+    </tr>`).join('');
+}
+
+// ===== RENDER ROOMS =====
+function renderRooms(){
+  document.getElementById('rooms-grid').innerHTML=rooms.map(room=>{
+    const d=new Date(room.date);
+    const dateStr=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';
+    const memoHtml=room.memo?`<div class="room-memo">📝 ${room.memo}</div>`:'';
+    const membersHtml=room.members.map((m,i)=>{
+      const r=i+1;
+      const rCls=r===1?'room-rank room-rank-1':r===2?'room-rank room-rank-2':r===3?'room-rank room-rank-3':'room-rank room-rank-other';
+      return `<div class="room-member"><div class="${rCls}">${r}</div><span class="room-member-name">${m.name}</span><span class="room-member-score ${scoreClass(m.score)}">${scoreStr(m.score)}</span></div>`;
+    }).join('');
+    return `<div class="room-card"><div class="room-header"><span class="room-date">📅 ${dateStr}</span><span class="room-games">${room.gamesCount}試合</span></div>${memoHtml}<div class="room-members">${membersHtml}</div></div>`;
+  }).join('');
+}
+
+// ===== RENDER STATS CARDS =====
+function renderStatsCards(){
+  const byScore=[...ranking].sort((a,b)=>b.totalScore-a.totalScore);
+  const byAvg=[...ranking].filter(p=>p.gameCount>=2).sort((a,b)=>b.avgScore-a.avgScore);
+  const byAvoid=[...ranking].filter(p=>p.gameCount>=2).sort((a,b)=>b.avoidLast-a.avoidLast);
+  const byRank1=[...ranking].sort((a,b)=>b.rank1-a.rank1);
+  const byBest=[...ranking].sort((a,b)=>b.bestScore-a.bestScore);
+  const cards=[
+    {label:'総合スコア 1位', value:scoreStr(byScore[0].totalScore)+'pt', name:byScore[0].name, icon:'🏆'},
+    {label:'平均スコア 1位', value:(byAvg[0].avgScore>0?'+':'')+byAvg[0].avgScore+'pt', name:byAvg[0].name, icon:'📊'},
+    {label:'ラス回避率 1位', value:pct(byAvoid[0].avoidLast), name:byAvoid[0].name, icon:'🛡️'},
+    {label:'最多1位', value:byRank1[0].rank1+'回', name:byRank1[0].name, icon:'👑'},
+    {label:'最高スコア', value:'+'+byBest[0].bestScore+'pt', name:byBest[0].name, icon:'⚡'},
+    {label:'総参加セッション', value:ranking.reduce((s,p)=>s+p.gameCount,0)+'回', name:'全プレイヤー合計', icon:'🎯'},
+  ];
+  document.getElementById('stats-cards').innerHTML=cards.map(c=>`
+    <div class="stat-card">
+      <div class="stat-label">${c.icon} ${c.label}</div>
+      <div class="stat-value">${c.value}</div>
+      <div class="stat-name">${c.name}</div>
+    </div>`).join('');
+}
+
+// ===== CHART LOGIC =====
+// 全プレイヤー名（参加者のみ）
+const allPlayers = [...new Set(sessions.flatMap(s=>s.members.map(m=>m.name)))];
+
+// 累積スコアデータ構築
+function buildCumulativeData(){
+  const cum={};
+  allPlayers.forEach(n=>{ cum[n]=[0]; });
+  sessions.forEach(sess=>{
+    allPlayers.forEach(n=>{
+      const m=sess.members.find(x=>x.name===n);
+      const prev=cum[n][cum[n].length-1];
+      cum[n].push(m ? prev+m.score : prev);
+    });
+  });
+  return cum;
+}
+
+// 順位変動データ構築（セッション後の累積スコアで順位計算）
+function buildRankData(){
+  const cum=buildCumulativeData();
+  const rankData={};
+  allPlayers.forEach(n=>{ rankData[n]=[null]; }); // 開始前はnull
+  sessions.forEach((sess,si)=>{
+    // このセッション後の累積スコア
+    const scores={};
+    allPlayers.forEach(n=>{ scores[n]=cum[n][si+1]; });
+    // 参加したことがあるプレイヤーのみランク付け
+    const participated=allPlayers.filter(n=>cum[n][si+1]!==cum[n][0]||si===0);
+    // 全員をスコアでソートして順位付け
+    const sorted=[...allPlayers].sort((a,b)=>scores[b]-scores[a]);
+    allPlayers.forEach(n=>{
+      // 一度も参加していない場合はnull
+      const hasParticipated=sessions.slice(0,si+1).some(s=>s.members.find(m=>m.name===n));
+      rankData[n].push(hasParticipated ? sorted.indexOf(n)+1 : null);
+    });
+  });
+  return rankData;
+}
+
+let chartCumulative=null, chartSession=null, chartRank=null;
+let activeCumulative=new Set(allPlayers);
+let activeSession=new Set(allPlayers);
+let activeRank=new Set(allPlayers);
+
+function makeChip(name, color, activeSet, updateFn, containerId){
+  const chip=document.createElement('div');
+  chip.className='filter-chip on';
+  chip.style.background=color;
+  chip.innerHTML=`<span class="chip-dot" style="background:#fff;opacity:0.7"></span>${name}`;
+  chip.addEventListener('click',()=>{
+    if(activeSet.has(name)){
+      activeSet.delete(name);
+      chip.classList.remove('on');
+      chip.style.background='var(--card2)';
+      chip.style.color='var(--text2)';
+    } else {
+      activeSet.add(name);
+      chip.classList.add('on');
+      chip.style.background=color;
+      chip.style.color='#fff';
+    }
+    updateFn();
+  });
+  document.getElementById(containerId).appendChild(chip);
+}
+
+function initFilters(){
+  allPlayers.forEach((name,i)=>{
+    const color=COLORS[i%COLORS.length];
+    makeChip(name,color,activeCumulative,updateCumulative,'filter-cumulative');
+    makeChip(name,color,activeSession,updateSession,'filter-session');
+    makeChip(name,color,activeRank,updateRank,'filter-rank');
+  });
+}
+
+function chartDefaults(){
+  return {
+    responsive:true,
+    maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'rgba(10,22,40,0.95)',
+        borderColor:'rgba(200,168,75,0.4)',
+        borderWidth:1,
+        titleColor:'#e8c96a',
+        bodyColor:'#e8edf5',
+        padding:10,
+        callbacks:{
+          label:ctx=>`  ${ctx.dataset.label}: ${ctx.parsed.y!=null?(ctx.parsed.y>0?'+':'')+ctx.parsed.y:'—'}`
+        }
+      }
+    },
+    scales:{
+      x:{
+        grid:{color:'rgba(30,48,80,0.8)'},
+        ticks:{color:'#8fa3bf',font:{size:11}}
+      },
+      y:{
+        grid:{color:'rgba(30,48,80,0.8)'},
+        ticks:{color:'#8fa3bf',font:{size:11},callback:v=>(v>0?'+':'')+v}
+      }
+    }
+  };
+}
+
+function updateCumulative(){
+  const cum=buildCumulativeData();
+  const labels=['開始',...sessions.map(s=>s.label)];
+  const datasets=allPlayers
+    .filter(n=>activeCumulative.has(n))
+    .map((n,i)=>({
+      label:n,
+      data:cum[n],
+      borderColor:COLORS[allPlayers.indexOf(n)%COLORS.length],
+      backgroundColor:'transparent',
+      borderWidth:2,
+      pointRadius:4,
+      pointHoverRadius:6,
+      tension:0.3,
+      spanGaps:true,
+    }));
+  if(chartCumulative){
+    chartCumulative.data.labels=labels;
+    chartCumulative.data.datasets=datasets;
+    chartCumulative.update();
+  } else {
+    const cfg=chartDefaults();
+    cfg.scales.y.title={display:true,text:'累積スコア (pt)',color:'#8fa3bf',font:{size:11}};
+    chartCumulative=new Chart(document.getElementById('chartCumulative'),{type:'line',data:{labels,datasets},options:cfg});
+  }
+}
+
+function updateSession(){
+  const labels=sessions.map(s=>s.label);
+  const datasets=allPlayers
+    .filter(n=>activeSession.has(n))
+    .map((n,i)=>{
+      const data=sessions.map(s=>{
+        const m=s.members.find(x=>x.name===n);
+        return m?m.score:null;
+      });
+      return {
+        label:n,
+        data,
+        borderColor:COLORS[allPlayers.indexOf(n)%COLORS.length],
+        backgroundColor:COLORS[allPlayers.indexOf(n)%COLORS.length]+'33',
+        borderWidth:2,
+        pointRadius:5,
+        pointHoverRadius:7,
+        tension:0.2,
+        spanGaps:false,
+      };
+    });
+  if(chartSession){
+    chartSession.data.labels=labels;
+    chartSession.data.datasets=datasets;
+    chartSession.update();
+  } else {
+    const cfg=chartDefaults();
+    cfg.scales.y.title={display:true,text:'スコア (pt)',color:'#8fa3bf',font:{size:11}};
+    chartSession=new Chart(document.getElementById('chartSession'),{type:'line',data:{labels,datasets},options:cfg});
+  }
+}
+
+function updateRank(){
+  const rankData=buildRankData();
+  const labels=['開始',...sessions.map(s=>s.label)];
+  const datasets=allPlayers
+    .filter(n=>activeRank.has(n))
+    .map((n,i)=>({
+      label:n,
+      data:rankData[n],
+      borderColor:COLORS[allPlayers.indexOf(n)%COLORS.length],
+      backgroundColor:'transparent',
+      borderWidth:2,
+      pointRadius:4,
+      pointHoverRadius:6,
+      tension:0.3,
+      spanGaps:true,
+    }));
+  const maxRank=allPlayers.length;
+  if(chartRank){
+    chartRank.data.labels=labels;
+    chartRank.data.datasets=datasets;
+    chartRank.update();
+  } else {
+    const cfg=chartDefaults();
+    cfg.scales.y.reverse=true;
+    cfg.scales.y.min=1;
+    cfg.scales.y.max=maxRank;
+    cfg.scales.y.ticks={...cfg.scales.y.ticks, stepSize:1, callback:v=>v+'位'};
+    cfg.scales.y.title={display:true,text:'順位',color:'#8fa3bf',font:{size:11}};
+    cfg.plugins.tooltip.callbacks.label=ctx=>`  ${ctx.dataset.label}: ${ctx.parsed.y!=null?ctx.parsed.y+'位':'—'}`;
+    chartRank=new Chart(document.getElementById('chartRank'),{type:'line',data:{labels,datasets},options:cfg});
+  }
+}
+
+// ===== TAB SWITCHING =====
+function showTab(tab, el){
+  document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  // desktop nav
+  document.querySelectorAll('.desktop-nav a').forEach(a=>a.classList.remove('active'));
+  // bottom nav
+  document.querySelectorAll('.bottom-nav-btn').forEach(b=>b.classList.remove('active'));
+  if(el){
+    el.classList.add('active');
+    // sync the other nav
+    const tabName=el.dataset?el.dataset.tab:null;
+    if(tabName){
+      document.querySelectorAll('.desktop-nav a').forEach((a,i)=>{
+        if(['ranking','graph','rooms','stats'][i]===tabName) a.classList.add('active');
+      });
+    } else {
+      document.querySelectorAll('.bottom-nav-btn').forEach(b=>{
+        if(b.dataset.tab===tab) b.classList.add('active');
+      });
+    }
+  }
+  // init charts lazily
+  if(tab==='graph'){
+    setTimeout(()=>{
+      if(!chartCumulative) updateCumulative();
+      if(!chartSession) updateSession();
+      if(!chartRank) updateRank();
+    },50);
+  }
+}
+
+function showRankingTab(type, btn){
+  ['score','avg','avoidlast','rank1'].forEach(t=>{
+    document.getElementById('ranking-'+t).style.display=t===type?'block':'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ===== INIT =====
+renderScore(); renderAvg(); renderAvoidLast(); renderRank1();
+renderRooms(); renderStatsCards(); renderDetail();
+initFilters();
+
+const totalGames=sessions.reduce((s,r)=>s+r.gamesCount,0);
+document.getElementById('hero-games').textContent=totalGames;
+document.getElementById('hero-players').textContent=allPlayers.length;
+document.getElementById('hero-rooms').textContent=sessions.length;
+</script>
+</body>
+</html>
